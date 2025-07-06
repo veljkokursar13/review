@@ -1,14 +1,28 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import data from './data'
 import Add from './Add'
 
 const Review = () => {
-    const [reviews, setReviews] = useState(data)
+    const [reviews, setReviews] = useState([])
     const [index, setIndex] = useState(0)
     const [showAddForm, setShowAddForm] = useState(false)
-    const {name, job, image, text} = reviews[index]
+
+    // Load reviews from localStorage on component mount
+    useEffect(() => {
+        const savedReviews = localStorage.getItem('reviews')
+        if (savedReviews) {
+            setReviews(JSON.parse(savedReviews))
+        } else {
+            // If no saved reviews, use the default data
+            setReviews(data)
+            localStorage.setItem('reviews', JSON.stringify(data))
+        }
+    }, [])
+
+    const {name, job, image, text} = reviews[index] || {}
+    
     const checkNumber = (number) => {
         if (number > reviews.length - 1) {
             return 0
@@ -37,9 +51,12 @@ const Review = () => {
         const reviewToAdd = {
             id: reviews.length + 1,
             ...newReview,
-            image: '.assets/placeholder.svg' // Default placeholder image
+            image: '/placeholder.svg' // Default placeholder image
         }
-        setReviews([...reviews, reviewToAdd])
+        const updatedReviews = [...reviews, reviewToAdd]
+        setReviews(updatedReviews)
+        // Save to localStorage
+        localStorage.setItem('reviews', JSON.stringify(updatedReviews))
         setShowAddForm(false)
     }
   return (
